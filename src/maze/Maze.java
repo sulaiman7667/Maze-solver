@@ -2,7 +2,7 @@ package maze;
 import java.io.*;
 import java.util.*;
 
-public class Maze{
+public class Maze implements java.io.Serializable{
 	public enum Direction {
 	NORTH,SOUTH,EAST,WEST
 
@@ -10,6 +10,7 @@ public class Maze{
 	private Tile entrance;
 	private Tile exit;
 	private List<List<Tile>> tiles;
+	
 
 	private Maze(){
 
@@ -20,28 +21,50 @@ public class Maze{
 	}
 
 	public static Maze fromTxt(String filepath){
-		String tempstr = "";
+		String line = "";
     	String mazeTxt = "";
-    	List<List<Tile>> tempTilesList = new ArrayList();
+    	int ent = 0;
+    	int ex = 0;
+    	List<List<Tile>> tileList = new ArrayList();
     	Tile enTile = null;
     	Tile exTile = null;
     	try{
     		BufferedReader mazeFile = new BufferedReader(new FileReader(filepath));
-    		while((tempstr = mazeFile.readLine()) != null){
+    		while((line = mazeFile.readLine()) != null){
     			List<Tile> templist = new ArrayList();
-    			for(int i = 0; i<tempstr.length(); i++){
-    				templist.add(Tile.fromChar(tempstr.charAt(i)));
+    			for(int i = 0; i<line.length(); i++){
+    				templist.add(Tile.fromChar(line.charAt(i)));
 
     			}
-    			tempTilesList.add(templist);
-    			mazeTxt += (tempstr + "\n");
+    			tileList.add(templist);
+    			mazeTxt += (line + "\n");
+    		}
+    		for(int i = 0; i<mazeTxt.length(); i++){
+    			if(mazeTxt.charAt(i) == 'e')
+    				ent = ent + 1;
+    			if(mazeTxt.charAt(i) == 'x')
+    				ex = ex + 1;
     		}
 
+
     	}
-    	catch(Exception ex){
+    	catch(Exception e) {
     		return null;
     	}
-    	return new Maze(tempTilesList);
+    	
+    	if(ent > 1)
+			throw new MultipleEntranceException("mulen");
+		if(ent == 0)
+			throw new NoEntranceException("noen");
+		if(ex > 1)
+			throw new MultipleExitException("mulex");
+		if(ex == 0)
+			throw new NoExitException("noex");
+		if( ent == 7)
+			throw new InvalidMazeException("wdw");
+    	
+
+    	return new Maze(tileList);
 	}
 
 	public Tile getAdjacentTile(Tile t, Direction d){
@@ -132,13 +155,13 @@ public class Maze{
 
 	}
 
-	// private void setEntrance(Tile t){
+	private void setEntrance(Tile t){
+		t.setType(Tile.Type.ENTRANCE);
+	}
 
-	// }
-
-// 	private void setExit(Tile t){
-
-// 	}
+	private void setExit(Tile t){
+		t.setType(Tile.Type.EXIT);
+	}	
 
 	public String toString(){
 		String x = "";

@@ -1,12 +1,13 @@
 package maze.routing;
 import maze.*;
 import java.util.*;
-public class RouteFinder{
+import java.io.*;
+public class RouteFinder implements java.io.Serializable{
 	private Maze maze;
 	private Stack<Tile> route = new Stack();
 	private boolean finished;
 
-	private List<Tile> pathList = new ArrayList();
+	private List<Tile> poppedList = new ArrayList();
 	private boolean ent = true;
 	private Tile poppedTile = null;
 
@@ -21,6 +22,9 @@ public class RouteFinder{
 	public List<Tile> getRoute(){
 		return route;
 	}
+	public List<Tile> getPoppedList(){
+		return poppedList;
+	}
 
 	public Tile getPoppedTile(){
 		return poppedTile;
@@ -32,19 +36,36 @@ public class RouteFinder{
 		return false;
 	}
 
-	// public static RouteFinder load(String s){
+	public static RouteFinder load(String path){
+		 RouteFinder rf = null;
+        try {
+            FileInputStream file = new FileInputStream(path);
+            ObjectInputStream obj = new ObjectInputStream(file);
+            rf = (RouteFinder) obj.readObject();
+        } catch(Exception ex){
+        	System.out.println(ex.getMessage());
+        } 
 
-	// }
+        return rf;
+	}
 
-	// public void save(String s){
+	public void save(String path){
+		try {
+            FileOutputStream file = new FileOutputStream(path);
+            ObjectOutputStream obj = new ObjectOutputStream(file);
+            obj.writeObject(this);
+            obj.close();
+            file.close();
+        } catch(Exception ex) {
+        	System.out.println(ex.getMessage());
+        }
 
-	// }
+	}
 
 	public boolean step(){
 		poppedTile = null;
 		if(ent == true){
 			route.add(maze.getEntrance());
-			pathList.add(maze.getEntrance());
 			ent = false;
 		}
 		if(!isFinished()){
@@ -52,43 +73,26 @@ public class RouteFinder{
 			Tile southTile = maze.getAdjacentTile(route.get(route.size() - 1), Maze.Direction.SOUTH);
 			Tile eastTile = maze.getAdjacentTile(route.get(route.size() - 1), Maze.Direction.EAST);
 			Tile westTile = maze.getAdjacentTile(route.get(route.size() - 1), Maze.Direction.WEST);
-			if(northTile !=null && northTile.isNavigable() && !route.contains(northTile)){
+			if(northTile !=null && northTile.isNavigable() && !route.contains(northTile) && !poppedList.contains(northTile)){
 				route.add(northTile);
-				pathList.add(northTile);
-				Tile prevTile = pathList.get(pathList.size() - 2);
-				if(prevTile.getType() != Tile.Type.ENTRANCE)
-					prevTile.setType(Tile.Type.NOTNAVIGABLE);
 			}
-			else if(southTile !=null && southTile.isNavigable() && !route.contains(southTile)){
-				route.add(southTile);
-				pathList.add(southTile);
-				Tile prevTile = pathList.get(pathList.size() - 2);
-				if(prevTile.getType() != Tile.Type.ENTRANCE)
-					prevTile.setType(Tile.Type.NOTNAVIGABLE);
-			}
-
-			else if(eastTile !=null && eastTile.isNavigable() && !route.contains(eastTile)){
+			else if(eastTile !=null && eastTile.isNavigable() && !route.contains(eastTile) && !poppedList.contains(eastTile)){
 				route.add(eastTile);
-				pathList.add(eastTile);
-				Tile prevTile = pathList.get(pathList.size() - 2);
-				if(prevTile.getType() != Tile.Type.ENTRANCE)
-					prevTile.setType(Tile.Type.NOTNAVIGABLE);
 			}
-			else if(westTile !=null && westTile.isNavigable() && !route.contains(westTile)){
+			else if(southTile !=null && southTile.isNavigable() && !route.contains(southTile) && !poppedList.contains(southTile)){
+				route.add(southTile);
+			}
+			else if(westTile !=null && westTile.isNavigable() && !route.contains(westTile) && !poppedList.contains(westTile)){
 				route.add(westTile);
-				pathList.add(westTile);
-				Tile prevTile = pathList.get(pathList.size() - 2);
-				if(prevTile.getType() != Tile.Type.ENTRANCE)
-					prevTile.setType(Tile.Type.NOTNAVIGABLE);
 			}
 			
 			else{
+				poppedList.add(route.peek());
 				poppedTile = route.pop();
-				poppedTile.setType(Tile.Type.NOTNAVIGABLE);
 
 			}
 			return false;
-	}
+		}
 		return true;
 		
 

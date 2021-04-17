@@ -1,9 +1,9 @@
 package maze;
 
-public class Tile {
+public class Tile implements java.io.Serializable {
 
 	public enum Type{
-	CORRIDOR,ENTRANCE,EXIT,WALL,NOTNAVIGABLE
+	CORRIDOR,ENTRANCE,EXIT,WALL
 	}
 
 	private Type type;
@@ -35,7 +35,7 @@ public class Tile {
 
 	}
 	public boolean isNavigable(){
-		if(getType() == Type.WALL || getType() == Type.NOTNAVIGABLE  || getType() == Type.ENTRANCE)
+		if(getType() == Type.WALL)
 			return false;
 		else
 			return true;
@@ -46,7 +46,7 @@ public class Tile {
 		String x = "";
 		if(getType() == Type.ENTRANCE)
 			x = "e";
-		if(getType() == Type.CORRIDOR  || getType() == Type.NOTNAVIGABLE)
+		if(getType() == Type.CORRIDOR)
 			x = ".";
 		if(getType() == Type.WALL)
 			x = "#";

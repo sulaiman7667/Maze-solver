@@ -16,11 +16,13 @@ public class Maze implements java.io.Serializable{
 
 	}
 
-	private Maze(List<List<Tile>> l){
+	private Maze(List<List<Tile>> l, Tile en, Tile ex){
 		tiles = l;
+		entrance = en;
+		exit = ex;
 	}
 
-	public static Maze fromTxt(String filepath){
+	public static Maze fromTxt(String filepath) throws InvalidMazeException{
 		String line = "";
     	String mazeTxt = "";
     	int ent = 0;
@@ -38,6 +40,7 @@ public class Maze implements java.io.Serializable{
     			}
     			tileList.add(templist);
     			mazeTxt += (line + "\n");
+
     		}
     		for(int i = 0; i<mazeTxt.length(); i++){
     			if(mazeTxt.charAt(i) == 'e')
@@ -45,26 +48,36 @@ public class Maze implements java.io.Serializable{
     			if(mazeTxt.charAt(i) == 'x')
     				ex = ex + 1;
     		}
+    		for(List<Tile> l: tileList){
+    			for(Tile t: l){
+    				if(t.getType() == Tile.Type.ENTRANCE)
+    					enTile = t;
+    				if(t.getType() == Tile.Type.EXIT)
+    					exTile = t;
+    		}
+    		}
 
 
     	}
     	catch(Exception e) {
     		return null;
     	}
-    	
-    	if(ent > 1)
-			throw new MultipleEntranceException("mulen");
-		if(ent == 0)
-			throw new NoEntranceException("noen");
-		if(ex > 1)
-			throw new MultipleExitException("mulex");
-		if(ex == 0)
-			throw new NoExitException("noex");
-		if( ent == 7)
-			throw new InvalidMazeException("wdw");
-    	
 
-    	return new Maze(tileList);
+    	if(ent > 1)
+			throw new MultipleEntranceException("Error: invalid maze, multiple entrances found\n");
+		if(ent == 0)
+			throw new NoEntranceException("Error: invalid maze, no entrance found\n");
+		if(ex > 1)
+			throw new MultipleExitException("Error: invalid maze, multiple exits found\n");
+		if(ex == 0)
+			throw new NoExitException("Error: invalid maze, no exit found\n");
+		for(int i = 0; i<tileList.size(); i++){
+			int size = tileList.get(0).size();
+			if(tileList.get(i).size() != size)
+				throw new RaggedMazeException("Error: invalid maze, maze is ragged.\n");
+		}
+
+    	return new Maze(tileList, enTile, exTile);
 	}
 
 	public Tile getAdjacentTile(Tile t, Direction d){
@@ -155,12 +168,38 @@ public class Maze implements java.io.Serializable{
 
 	}
 
-	private void setEntrance(Tile t){
-		t.setType(Tile.Type.ENTRANCE);
+	private void setEntrance(Tile t) throws MultipleEntranceException{
+		try {
+			if(getTileLocation(t) == null)
+				throw new Exception("Tile not in maze.");
+			if(entrance == null)
+				entrance = t;
+			else
+				throw new MultipleEntranceException("Multiple entrances found.");
+		}
+		catch(MultipleEntranceException a) {
+			throw a;
+		}
+		catch(Exception b){
+
+		}
 	}
 
-	private void setExit(Tile t){
-		t.setType(Tile.Type.EXIT);
+	private void setExit(Tile t) throws MultipleExitException{
+		try {
+			if(getTileLocation(t) == null)
+				throw new Exception("Tile not in maze.");
+			if(exit == null)
+				exit = t;
+			else
+				throw new MultipleExitException("Multiple exits found.");
+		}
+		catch(MultipleExitException a) {
+			throw a;
+		}
+		catch(Exception b){
+
+		}
 	}	
 
 	public String toString(){

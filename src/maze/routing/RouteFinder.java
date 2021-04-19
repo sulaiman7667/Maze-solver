@@ -13,6 +13,7 @@ public class RouteFinder implements java.io.Serializable{
 
 	public RouteFinder(Maze m){
 		maze = m;
+		finished = false;
 	}
 
 	public Maze getMaze(){
@@ -31,9 +32,7 @@ public class RouteFinder implements java.io.Serializable{
 	}
 
 	public boolean isFinished(){
-		if(route.get((route.size() - 1)).toString() == "x")
-			return true;
-		return false;
+		return finished;
 	}
 
 	public static RouteFinder load(String path){
@@ -91,6 +90,8 @@ public class RouteFinder implements java.io.Serializable{
 				poppedTile = route.pop();
 
 			}
+			if(route.get((route.size() - 1)).toString() == "x")
+				finished = true;
 			return false;
 		}
 		return true;
@@ -99,18 +100,23 @@ public class RouteFinder implements java.io.Serializable{
 	}
 
 	public String toString(){
-		String x = "e";
+		String x = "";
 		List<Tile> route = getRoute();
 		for (int i = 0;i<maze.getTiles().size();i++) {
-			for (int j = 1;j<maze.getTiles().get(i).size();j++) {
+			for (int j = 0;j<maze.getTiles().get(i).size();j++) {
 				if(route.contains(maze.getTiles().get(i).get(j)))
-					x += "*";
+					if(maze.getTiles().get(i).get(j).getType() == Tile.Type.ENTRANCE)
+						x += "e";
+					else if(maze.getTiles().get(i).get(j).getType() == Tile.Type.EXIT)
+						x += "x";
+					else
+						x += "*";
+				else if(poppedList.contains(maze.getTiles().get(i).get(j)))
+					x += "-";
 				else
-					x += maze.getTiles().get(i).get(j).toString();
-			
-		}
-		x+="\n";
-			
+					x += maze.getTiles().get(i).get(j).toString();	
+			}
+			x+="\n";	
 		}
 		return x;
 	}

@@ -25,7 +25,7 @@ public class MazeApplication extends Application  {
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws Exception{
+	public void start(Stage primaryStage){
 		primaryStage.setTitle("Maze solver");
 		Button loadMapBtn = new Button("Load map");
 		Button loadRouteBtn = new Button("Load route");
@@ -46,149 +46,170 @@ public class MazeApplication extends Application  {
 		primaryStage.show();
 
 		loadMapBtn.setOnAction(e -> {
-			FileChooser f = new FileChooser();
-			File file = f.showOpenDialog(primaryStage);
-			GridPane grid = new GridPane();
-			Maze maze = Maze.fromTxt(file.getPath());
-			List<List<Tile>> tiles = maze.getTiles();
-			int row = 0;
-			int column = 0;
-			for(int i = 0; i<tiles.size(); i ++){
-				for(int j = 0; j<tiles.get(i).size(); j++){
-					Tile tile = tiles.get(i).get(j);
-					Pane pane = new Pane();
-					pane.setPrefSize(60,60);
-					if(tile.getType() == Tile.Type.ENTRANCE)
-						pane.setStyle("-fx-background-color: lightgreen;");
-					else if(tile.getType() == Tile.Type.WALL)
-						pane.setStyle("-fx-background-color: brown;");
-					else if(tile.getType() == Tile.Type.CORRIDOR)
-						pane.setStyle("-fx-background-color: white;");
-					else if(tile.getType() == Tile.Type.EXIT)
-						pane.setStyle("-fx-background-color: orange;");
+			try {
+				FileChooser f = new FileChooser();
+				File file = f.showOpenDialog(primaryStage);
+				GridPane grid = new GridPane();
+				try {
+					Maze maze = Maze.fromTxt(file.getPath());
+					List<List<Tile>> tiles = maze.getTiles();
+					int row = 0;
+					int column = 0;
+					for(int i = 0; i<tiles.size(); i ++){
+						for(int j = 0; j<tiles.get(i).size(); j++){
+							Tile tile = tiles.get(i).get(j);
+							Pane pane = new Pane();
+							pane.setPrefSize(60,60);
+							if(tile.getType() == Tile.Type.ENTRANCE)
+								pane.setStyle("-fx-background-color: lightgreen;");
+							else if(tile.getType() == Tile.Type.WALL)
+								pane.setStyle("-fx-background-color: brown;");
+							else if(tile.getType() == Tile.Type.CORRIDOR)
+								pane.setStyle("-fx-background-color: white;");
+							else if(tile.getType() == Tile.Type.EXIT)
+								pane.setStyle("-fx-background-color: orange;");
 
-					GridPane.setConstraints(pane,column,row);
-					grid.getChildren().addAll(pane);
-					column = column + 1;
-				}
-				row = row + 1;
-				column = 0;
+							GridPane.setConstraints(pane,column,row);
+							grid.getChildren().addAll(pane);
+							column = column + 1;
+						}
+						row = row + 1;
+						column = 0;
+					}
+
+					RouteFinder routeFinder = new RouteFinder(maze);
+
+					stepBtn.setOnAction(n -> {
+						routeFinder.step();
+						Tile currentTile = routeFinder.getRoute().get(routeFinder.getRoute().size()-1);
+						Tile poppedTile = routeFinder.getPoppedTile();
+						Maze.Coordinate c = maze.getTileLocationNew(currentTile);
+						Pane pane = new Pane();
+						pane.setPrefSize(60,60);
+						System.out.print(routeFinder.toString());
+						if(poppedTile == null){
+							if(currentTile.getType() == Tile.Type.EXIT)
+								pane.setStyle("-fx-background-color: orange;");
+							else
+								pane.setStyle("-fx-background-color: green;");
+						}
+						else{
+							c = maze.getTileLocationNew(poppedTile);
+							pane.setStyle("-fx-background-color: red;");
+						}
+						GridPane.setConstraints(pane,c.getY(),c.getX());
+						grid.getChildren().addAll(pane);
+
+					});
+					saveRouteBtn.setOnAction(m ->{
+					routeFinder.save("route.bin");
+					
+					});
 			}
-
-			RouteFinder routeFinder = new RouteFinder(maze);
-
-			stepBtn.setOnAction(n -> {
-				routeFinder.step();
-				Tile currentTile = routeFinder.getRoute().get(routeFinder.getRoute().size()-1);
-				Tile poppedTile = routeFinder.getPoppedTile();
-				Maze.Coordinate c = maze.getTileLocationNew(currentTile);
-				Pane pane = new Pane();
-				pane.setPrefSize(60,60);
-				System.out.print(routeFinder.getRoute());
-				if(poppedTile == null){
-					if(currentTile.getType() == Tile.Type.EXIT)
-						pane.setStyle("-fx-background-color: orange;");
-					else
-						pane.setStyle("-fx-background-color: green;");
-				}
-				else{
-					c = maze.getTileLocationNew(poppedTile);
-					pane.setStyle("-fx-background-color: red;");
-				}
-				GridPane.setConstraints(pane,c.getY(),c.getX());
-				grid.getChildren().addAll(pane);
-
-			});
-		borderpane.setTop(hbox);
-		borderpane.setCenter(grid);
-		primaryStage.setScene(scene);
-		saveRouteBtn.setOnAction(m ->{
-			routeFinder.save("route.bin");
+			catch(InvalidMazeException a) {
+				System.out.print(a.getMessage());
+			}
+			borderpane.setTop(hbox);
+			borderpane.setCenter(grid);
+			primaryStage.setScene(scene);
+			}
+			catch(Exception b) {
+				System.out.print("No file selected, try again.\n");
+			}
 			
-		});
+
+
+		
+		
 		});
 		loadRouteBtn.setOnAction(e -> {
-			FileChooser f = new FileChooser();
-			File file = f.showOpenDialog(primaryStage);
-			RouteFinder routeFinder = RouteFinder.load(file.getPath());
-			GridPane grid = new GridPane();
-			Maze maze = routeFinder.getMaze();
-			List<List<Tile>> tiles = maze.getTiles();
-			int row = 0;
-			int column = 0;
-			for(int i = 0; i<tiles.size(); i ++){
-				for(int j = 0; j<tiles.get(i).size(); j++){
-					Tile tile = tiles.get(i).get(j);
+			try {
+				FileChooser f = new FileChooser();
+				File file = f.showOpenDialog(primaryStage);
+				RouteFinder routeFinder = RouteFinder.load(file.getPath());
+				GridPane grid = new GridPane();
+				Maze maze = routeFinder.getMaze();
+				List<List<Tile>> tiles = maze.getTiles();
+				int row = 0;
+				int column = 0;
+				for(int i = 0; i<tiles.size(); i ++){
+					for(int j = 0; j<tiles.get(i).size(); j++){
+						Tile tile = tiles.get(i).get(j);
+						Pane pane = new Pane();
+						pane.setPrefSize(60,60);
+						if(tile.getType() == Tile.Type.ENTRANCE)
+							pane.setStyle("-fx-background-color: lightgreen;");
+						else if(tile.getType() == Tile.Type.WALL)
+							pane.setStyle("-fx-background-color: brown;");
+						else if(tile.getType() == Tile.Type.CORRIDOR)
+							pane.setStyle("-fx-background-color: white;");
+						else if(tile.getType() == Tile.Type.EXIT)
+							pane.setStyle("-fx-background-color: orange;");
+
+						GridPane.setConstraints(pane,column,row);
+						grid.getChildren().addAll(pane);
+						column = column + 1;
+					}
+					row = row + 1;
+					column = 0;
+				}
+				for(int i =0;i<routeFinder.getRoute().size(); i++){
+					Tile tile = routeFinder.getRoute().get(i);
+					Maze.Coordinate c = maze.getTileLocationNew(tile);
 					Pane pane = new Pane();
 					pane.setPrefSize(60,60);
-					if(tile.getType() == Tile.Type.ENTRANCE)
-						pane.setStyle("-fx-background-color: lightgreen;");
-					else if(tile.getType() == Tile.Type.WALL)
-						pane.setStyle("-fx-background-color: brown;");
-					else if(tile.getType() == Tile.Type.CORRIDOR)
-						pane.setStyle("-fx-background-color: white;");
-					else if(tile.getType() == Tile.Type.EXIT)
-						pane.setStyle("-fx-background-color: orange;");
-
-					GridPane.setConstraints(pane,column,row);
+					pane.setStyle("-fx-background-color: green;");
+					if(tile.getType() == Tile.Type.EXIT)
+							pane.setStyle("-fx-background-color: orange;");
+					GridPane.setConstraints(pane,c.getY(),c.getX());
 					grid.getChildren().addAll(pane);
-					column = column + 1;
+
 				}
-				row = row + 1;
-				column = 0;
-			}
-			for(int i =0;i<routeFinder.getRoute().size(); i++){
-				Tile tile = routeFinder.getRoute().get(i);
-				Maze.Coordinate c = maze.getTileLocationNew(tile);
-				Pane pane = new Pane();
-				pane.setPrefSize(60,60);
-				pane.setStyle("-fx-background-color: green;");
-				if(tile.getType() == Tile.Type.EXIT)
-						pane.setStyle("-fx-background-color: orange;");
-				GridPane.setConstraints(pane,c.getY(),c.getX());
-				grid.getChildren().addAll(pane);
-
-			}
-			for(int i =0;i<routeFinder.getPoppedList().size(); i++){
-				Tile t = routeFinder.getPoppedList().get(i);
-				Maze.Coordinate c = maze.getTileLocationNew(t);
-				Pane pane = new Pane();
-				pane.setPrefSize(60,60);
-				pane.setStyle("-fx-background-color: red;");
-				GridPane.setConstraints(pane,c.getY(),c.getX());
-				grid.getChildren().addAll(pane);
-
-			}
-
-
-			stepBtn.setOnAction(n -> {
-				routeFinder.step();
-				Tile currentTile = routeFinder.getRoute().get(routeFinder.getRoute().size()-1);
-				Tile poppedTile = routeFinder.getPoppedTile();
-				Maze.Coordinate c = maze.getTileLocationNew(currentTile);
-				Pane pane = new Pane();
-				pane.setPrefSize(60,60);
-
-				if(poppedTile == null){
-					if(currentTile.getType() == Tile.Type.EXIT)
-						pane.setStyle("-fx-background-color: orange;");
-					else
-						pane.setStyle("-fx-background-color: green;");
-				}
-				else{
-					c = maze.getTileLocationNew(poppedTile);
+				for(int i =0;i<routeFinder.getPoppedList().size(); i++){
+					Tile t = routeFinder.getPoppedList().get(i);
+					Maze.Coordinate c = maze.getTileLocationNew(t);
+					Pane pane = new Pane();
+					pane.setPrefSize(60,60);
 					pane.setStyle("-fx-background-color: red;");
-				}
-				GridPane.setConstraints(pane,c.getY(),c.getX());
-				grid.getChildren().addAll(pane);
+					GridPane.setConstraints(pane,c.getY(),c.getX());
+					grid.getChildren().addAll(pane);
 
+				}
+
+
+				stepBtn.setOnAction(n -> {
+					routeFinder.step();
+					Tile currentTile = routeFinder.getRoute().get(routeFinder.getRoute().size()-1);
+					Tile poppedTile = routeFinder.getPoppedTile();
+					Maze.Coordinate c = maze.getTileLocationNew(currentTile);
+					Pane pane = new Pane();
+					pane.setPrefSize(60,60);
+
+					if(poppedTile == null){
+						if(currentTile.getType() == Tile.Type.EXIT)
+							pane.setStyle("-fx-background-color: orange;");
+						else
+							pane.setStyle("-fx-background-color: green;");
+					}
+					else{
+						c = maze.getTileLocationNew(poppedTile);
+						pane.setStyle("-fx-background-color: red;");
+					}
+					GridPane.setConstraints(pane,c.getY(),c.getX());
+					grid.getChildren().addAll(pane);
+
+				});
+			borderpane.setTop(hbox);
+			borderpane.setCenter(grid);
+			primaryStage.setScene(scene);
+			saveRouteBtn.setOnAction(m ->{
+				routeFinder.save("route.bin");
 			});
-		borderpane.setTop(hbox);
-		borderpane.setCenter(grid);
-		primaryStage.setScene(scene);
-		saveRouteBtn.setOnAction(m ->{
-			routeFinder.save("route.bin");
-		});
+
+		}
+		catch(Exception c){
+			System.out.print("No route file selected, try again.\n");
+		}
 		});
 	}
 

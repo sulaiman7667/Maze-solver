@@ -2,26 +2,59 @@ package maze;
 import java.io.*;
 import java.util.*;
 
+/**
+ * The Class Maze.
+* @author Sulaiman Alhmoudi
+* @version 1.0
+*/
 public class Maze implements java.io.Serializable{
+	/**
+     * The enum Direction.
+     */
 	public enum Direction {
-	NORTH,SOUTH,EAST,WEST
+		/** The north direction. */
+		NORTH,
+		/** The south direction. */
+		SOUTH,
+		/** The east direction. */
+		EAST,
+		/** The west direction. */
+		WEST
 
 	}
+	/** The entrance tile. */
 	private Tile entrance;
+	/** The exit tile. */
 	private Tile exit;
+	/** The list of tiles. */
 	private List<List<Tile>> tiles;
 	
-
+	/**
+     * Instantiates a new Maze.
+     *
+     */
 	private Maze(){
 
 	}
-
+	/**
+     * Instantiates a new Maze.
+     *
+     * @param l the tiles 2d-list
+     * @param en the entrance tile
+     * @param ex the exit tile
+     */
 	private Maze(List<List<Tile>> l, Tile en, Tile ex){
 		tiles = l;
 		entrance = en;
 		exit = ex;
 	}
-
+	/**
+     * returns a maze from a textfile.
+     *
+     * @param filepath the filepath
+     * @return the maze
+     * @throws InvalidMazeException throws when some conditions are not met
+     */
 	public static Maze fromTxt(String filepath) throws InvalidMazeException{
 		String line = "";
     	String mazeTxt = "";
@@ -64,22 +97,28 @@ public class Maze implements java.io.Serializable{
     	}
 
     	if(ent > 1)
-			throw new MultipleEntranceException("Error: invalid maze, multiple entrances found\n");
+			throw new MultipleEntranceException("Error: invalid maze, multiple entrances found.\n");
 		if(ent == 0)
-			throw new NoEntranceException("Error: invalid maze, no entrance found\n");
+			throw new NoEntranceException("Error: invalid maze, no entrance found.\n");
 		if(ex > 1)
-			throw new MultipleExitException("Error: invalid maze, multiple exits found\n");
+			throw new MultipleExitException("Error: invalid maze, multiple exits found.\n");
 		if(ex == 0)
-			throw new NoExitException("Error: invalid maze, no exit found\n");
+			throw new NoExitException("Error: invalid maze, no exit found.\n");
 		for(int i = 0; i<tileList.size(); i++){
 			int size = tileList.get(0).size();
 			if(tileList.get(i).size() != size)
-				throw new RaggedMazeException("Error: invalid maze, maze is ragged.\n");
+				throw new RaggedMazeException("Error: invalid maze, maze is ragged; length of rows do not match each other.\n");
 		}
 
     	return new Maze(tileList, enTile, exTile);
 	}
-
+	/**
+     * return adjacent tile in a certain direction.
+     *
+     * @param t the tile
+     * @param d the direction
+     * @return the adjacent tile
+     */
 	public Tile getAdjacentTile(Tile t, Direction d){
 		for (int i = 0;i<tiles.size(); i++) {
 			for (int j = 0;j < tiles.get(i).size();j++) {
@@ -113,7 +152,11 @@ public class Maze implements java.io.Serializable{
 		}
 		return null;
 	}
-
+	/**
+     * returns the entrance tile.
+     *
+     * @return the entrance tile
+     */
 	public Tile getEntrance(){
 		for (int i = 0;i<tiles.size(); i++) {
 			for (int j = 0;j < tiles.get(i).size();j++) {
@@ -125,7 +168,11 @@ public class Maze implements java.io.Serializable{
 		return null;
 
 	}
-
+	/**
+     * returns the exit tile.
+     *
+     * @return the exit tile
+     */
 	public Tile getExit(){
 		for (int i = 0;i<tiles.size(); i++) {
 			for (int j = 0;j < tiles.get(i).size();j++) {
@@ -136,13 +183,23 @@ public class Maze implements java.io.Serializable{
 		}
 		return null;
 	}
-
+	/**
+     * returns the entrance tile.
+     *
+     * @param c the coordinate
+     * @return the tile at location c
+     */
 	public Tile getTileAtLocation(Coordinate c){
 		int column = c.getX();
 		int row = c.getY();
 		return tiles.get(5-row).get(column);
 	}
-
+	/**
+     * returns the coordinate of a tile from bottom to top ordering.
+     *
+     * @param t the tile
+     * @return the location of a tile
+     */
 	public Coordinate getTileLocation(Tile t){
 		for (int i = 0;i<tiles.size(); i++) {
 			for (int j = 0;j < tiles.get(i).size();j++) {
@@ -152,7 +209,12 @@ public class Maze implements java.io.Serializable{
 		}
 		return null;
 	}
-
+	/**
+     * returns the coordinate of a tile from top to bottom ordering.
+     *
+     * @param t the tile
+     * @return the location of a tile
+     */
 	public Coordinate getTileLocationNew(Tile t){
 		for (int i = 0;i<tiles.size(); i++) {
 			for (int j = 0;j < tiles.get(i).size();j++) {
@@ -162,12 +224,20 @@ public class Maze implements java.io.Serializable{
 		}
 		return null;
 	}
-
+	/**
+     * returns the tiles list.
+     *
+     * @return the tiles list
+     */
 	public List<List<Tile>> getTiles() {
 		return tiles;
 
 	}
-
+	/**
+     * sets the tile to an entrance variable.
+     *
+     * @param t the tile
+     */
 	private void setEntrance(Tile t) throws MultipleEntranceException{
 		try {
 			if(getTileLocation(t) == null)
@@ -184,7 +254,11 @@ public class Maze implements java.io.Serializable{
 
 		}
 	}
-
+	/**
+     * sets the tile to an exit variable.
+     *
+     * @param t the tile
+     */
 	private void setExit(Tile t) throws MultipleExitException{
 		try {
 			if(getTileLocation(t) == null)
@@ -201,7 +275,11 @@ public class Maze implements java.io.Serializable{
 
 		}
 	}	
-
+	/**
+     * converts the maze to a string.
+     *
+     * @return the string
+     */
 	public String toString(){
 		String x = "";
 		for(int i = 0; i<tiles.size(); i++){
@@ -213,26 +291,47 @@ public class Maze implements java.io.Serializable{
 		return x;
 
 	}
-
+	/**
+ 	* The Class Maze.
+	*/
 	public class Coordinate{
+	/** the x coordinate. */
 	private int x;
-	private int y;
-
+	/** the y coordinate. */
+	private int y;	
+	/**
+     * instantiates a new coordinate
+     *
+     * @param a the x value
+     * @param b the y value
+     */
 	public Coordinate(int a, int b){
 		x = a;
 		y = b;
 	}
-
+	/**
+     * returns x.
+     *
+     * @return the x value
+     */
 	public int getX(){
 		return x;
 
 	}
-
+	/**
+     * returns y.
+     *
+     * @return the y value
+     */
 	public int getY(){
 		return y;
 		
 	}
-
+	/**
+     * converts the coordinate to a string
+     *
+     * @return the string
+     */
 	public String toString(){
 		return ("(" + getX() + ", " + getY() + ")");
 	}

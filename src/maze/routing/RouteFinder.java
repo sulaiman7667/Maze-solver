@@ -2,39 +2,79 @@ package maze.routing;
 import maze.*;
 import java.util.*;
 import java.io.*;
+/**
+ * The Class RouteFinder.
+* @author Sulaiman Alhmoudi
+* @version 1.0
+*/
 public class RouteFinder implements java.io.Serializable{
+	/** The maze. */
 	private Maze maze;
+	/** The route. */
 	private Stack<Tile> route = new Stack();
+	/** The finished boolean. */
 	private boolean finished;
-
+	/** The poppedlist. */
 	private List<Tile> poppedList = new ArrayList();
+	/** The ent boolean. */
 	private boolean ent = true;
+	/** The popped tile. */
 	private Tile poppedTile = null;
-
+	/**
+     * Instantiates a new RouteFinder.
+     *
+     * @param m the maze
+     */
 	public RouteFinder(Maze m){
 		maze = m;
 		finished = false;
 	}
-
+	/**
+     * returns the maze.
+     *
+     * @return the maze
+     */
 	public Maze getMaze(){
 		return maze;
 	}
-
+	/**
+     * returns the route.
+     *
+     * @return the route
+     */
 	public List<Tile> getRoute(){
 		return route;
 	}
+	/**
+     * returns the poppedlist.
+     *
+     * @return the poppedList
+     */
 	public List<Tile> getPoppedList(){
 		return poppedList;
 	}
-
+	/**
+     * returns the popped tile.
+     *
+     * @return the poppedTile
+     */
 	public Tile getPoppedTile(){
 		return poppedTile;
 	}
-
+	/**
+     * returns the finished boolean.
+     *
+     * @return the finished
+     */
 	public boolean isFinished(){
 		return finished;
 	}
-
+	/**
+     * loads the RouteFinder object.
+     *
+     * @param path the file path
+     * @return the RouteFinder object
+     */
 	public static RouteFinder load(String path){
 		 RouteFinder rf = null;
         try {
@@ -42,12 +82,15 @@ public class RouteFinder implements java.io.Serializable{
             ObjectInputStream obj = new ObjectInputStream(file);
             rf = (RouteFinder) obj.readObject();
         } catch(Exception ex){
-        	System.out.println(ex.getMessage());
         } 
 
         return rf;
 	}
-
+	/**
+     * saves the RouteFinder object.
+     *
+     * @param path the file path
+     */
 	public void save(String path){
 		try {
             FileOutputStream file = new FileOutputStream(path);
@@ -56,12 +99,15 @@ public class RouteFinder implements java.io.Serializable{
             obj.close();
             file.close();
         } catch(Exception ex) {
-        	System.out.println(ex.getMessage());
         }
 
 	}
-
-	public boolean step(){
+	/**
+     * algorithm for solving the maze step by step.
+     *
+     * @throws NoRouteFoundException thrown when no route is found
+     */
+	public boolean step() throws NoRouteFoundException{
 		poppedTile = null;
 		if(ent == true){
 			route.add(maze.getEntrance());
@@ -86,19 +132,26 @@ public class RouteFinder implements java.io.Serializable{
 			}
 			
 			else{
+				if(route.size() == 1)
+					throw new NoRouteFoundException("No route found.\n");
 				poppedList.add(route.peek());
 				poppedTile = route.pop();
 
 			}
 			if(route.get((route.size() - 1)).toString() == "x")
 				finished = true;
+	
 			return false;
 		}
 		return true;
 		
 
 	}
-
+	/**
+     * converts the maze with the route to a string.
+     *
+     * @return the string
+     */
 	public String toString(){
 		String x = "";
 		List<Tile> route = getRoute();

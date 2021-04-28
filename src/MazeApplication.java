@@ -35,6 +35,7 @@ public class MazeApplication extends Application  {
      */
 	@Override
 	public void start(Stage primaryStage){
+		int[] fileNumber = {0};
 		primaryStage.setTitle("Maze solver");
 		MenuItem loadMapBtn = new MenuItem("Load map");
 		MenuItem loadRouteBtn = new MenuItem("Load route");
@@ -57,6 +58,7 @@ public class MazeApplication extends Application  {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
+		
 
 		loadMapBtn.setOnAction(e -> {
 			try {
@@ -72,7 +74,7 @@ public class MazeApplication extends Application  {
 						for(int j = 0; j<tiles.get(i).size(); j++){
 							Tile tile = tiles.get(i).get(j);
 							Block block = new Block(tile);
-							block.setPrefSize(60,60);
+							block.setPrefSize(600,600);
 							GridPane.setConstraints(block,column,row);
 							grid.getChildren().addAll(block);
 							column = column + 1;
@@ -90,7 +92,7 @@ public class MazeApplication extends Application  {
 						Tile poppedTile = routeFinder.getPoppedTile();
 						Maze.Coordinate c = maze.getTileLocationNew(currentTile);
 						Block block = new Block();
-						block.setPrefSize(60,60);
+						block.setPrefSize(600,600);
 
 						if(poppedTile == null){
 							if(currentTile.getType() == Tile.Type.EXIT)
@@ -108,7 +110,8 @@ public class MazeApplication extends Application  {
 						}
 					});
 					saveRouteBtn.setOnAction(m ->{
-					routeFinder.save("route.bin");
+						routeFinder.save("route_" + fileNumber[0] + ".bin");
+						fileNumber[0] = fileNumber[0] + 1;
 					
 					});
 			}
@@ -142,7 +145,7 @@ public class MazeApplication extends Application  {
 					for(int j = 0; j<tiles.get(i).size(); j++){
 						Tile tile = tiles.get(i).get(j);
 						Block block = new Block(tile);
-						block.setPrefSize(60,60);
+						block.setPrefSize(600,600);
 						GridPane.setConstraints(block,column,row);
 						grid.getChildren().addAll(block);
 						column = column + 1;
@@ -154,7 +157,7 @@ public class MazeApplication extends Application  {
 					Tile tile = routeFinder.getRoute().get(i);
 					Maze.Coordinate c = maze.getTileLocationNew(tile);
 					Block block = new Block();
-					block.setPrefSize(60,60);
+					block.setPrefSize(600,600);
 					if(tile.getType() == Tile.Type.EXIT)
 							block.setStyle("-fx-background-color: orange;");
 					GridPane.setConstraints(block,c.getY(),c.getX());
@@ -165,7 +168,7 @@ public class MazeApplication extends Application  {
 					Tile t = routeFinder.getPoppedList().get(i);
 					Maze.Coordinate c = maze.getTileLocationNew(t);
 					Block block = new Block();
-					block.setPrefSize(60,60);
+					block.setPrefSize(600,600);
 					block.setStyle("-fx-background-color: red;");
 					GridPane.setConstraints(block,c.getY(),c.getX());
 					grid.getChildren().addAll(block);
@@ -180,7 +183,7 @@ public class MazeApplication extends Application  {
 						Tile poppedTile = routeFinder.getPoppedTile();
 						Maze.Coordinate c = maze.getTileLocationNew(currentTile);
 						Block block = new Block();
-						block.setPrefSize(60,60);
+						block.setPrefSize(600,600);
 
 						if(poppedTile == null){
 							if(currentTile.getType() == Tile.Type.EXIT)
@@ -203,7 +206,8 @@ public class MazeApplication extends Application  {
 			primaryStage.setScene(scene);
 
 			saveRouteBtn.setOnAction(m ->{
-				routeFinder.save("route.bin");
+				routeFinder.save("route_" + fileNumber[0] + ".bin");
+				fileNumber[0] = fileNumber[0] + 1;
 			});
 
 		}
@@ -214,6 +218,8 @@ public class MazeApplication extends Application  {
 
 
 	}
+	
+
 
 }
 

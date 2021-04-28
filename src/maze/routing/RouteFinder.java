@@ -89,11 +89,11 @@ public class RouteFinder implements java.io.Serializable{
 	/**
      * saves the RouteFinder object.
      *
-     * @param path the file path
+     * @param filename the file name
      */
-	public void save(String path){
+	public void save(String filename){
 		try {
-            FileOutputStream file = new FileOutputStream(path);
+            FileOutputStream file = new FileOutputStream(filename);
             ObjectOutputStream obj = new ObjectOutputStream(file);
             obj.writeObject(this);
             obj.close();
@@ -121,12 +121,14 @@ public class RouteFinder implements java.io.Serializable{
 			if(northTile !=null && northTile.isNavigable() && !route.contains(northTile) && !poppedList.contains(northTile)){
 				route.add(northTile);
 			}
-			else if(eastTile !=null && eastTile.isNavigable() && !route.contains(eastTile) && !poppedList.contains(eastTile)){
-				route.add(eastTile);
-			}
 			else if(southTile !=null && southTile.isNavigable() && !route.contains(southTile) && !poppedList.contains(southTile)){
 				route.add(southTile);
 			}
+			
+			else if(eastTile !=null && eastTile.isNavigable() && !route.contains(eastTile) && !poppedList.contains(eastTile)){
+				route.add(eastTile);
+			}
+			
 			else if(westTile !=null && westTile.isNavigable() && !route.contains(westTile) && !poppedList.contains(westTile)){
 				route.add(westTile);
 			}
